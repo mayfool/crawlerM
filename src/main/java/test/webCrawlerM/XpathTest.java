@@ -49,19 +49,35 @@ public class XpathTest {
     Assert.assertEquals("b", list.get(1));
 	}
 	
+//使用方法 可以利用方法a来进行对单个xPath的判断，
+//也可以通过方法c传入一个String数组的方法来对所有数组里的xPath
+//进行判断 
 	
-	public int XpathTestOne(Document doc,String xPath){
+	public static String XpathTestOne(String url,String xPath) throws IOException{//a
+		Document doc=Jsoup.connect(url).get();
 		String result=Xsoup.compile(xPath).evaluate(doc).get();
 		if(result==null||result=="")
-		 return 0;
+		 return "0";
 		
-		return 1;
+		return "1";
+		
+	}
+	
+	
+	//对单个传入的xPath进行测试
+	public static String XpathTestOne(Document doc,String xPath){
+		String result=Xsoup.compile(xPath).evaluate(doc).get();
+		if(result==null||result=="")
+		 return "0";
+		
+		return "1";
 		
 		
 		
 	}
-	
-	public String XpathTests(Document doc,String []xpaths){
+
+	public static String XpathTests(String  url,String []xpaths) throws IOException{
+		Document doc=Jsoup.connect(url).get();
 		int length=xpaths.length;
 		String value="";
 		for(int i=0;i<length;i++){
