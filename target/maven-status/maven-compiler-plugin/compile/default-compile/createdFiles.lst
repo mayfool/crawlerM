@@ -1,0 +1,5 @@
+test\webCrawlerM\App.class
+test\webCrawlerM\BaseUrl.class
+test\webCrawlerM\JsoupTest.class
+test\webCrawlerM\redisTest.class
+test\webCrawlerM\crawler.class
