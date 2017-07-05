@@ -7,12 +7,15 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.jsoup.*;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
+import us.codecraft.xsoup.Xsoup;
 
 public class crawler implements Runnable {
 	redisOperation rO;
@@ -99,7 +102,7 @@ public class crawler implements Runnable {
 	}
 
 	public void storeCoreUrl(String url) {
-		rO.redisUrlSadd(url, "core");
+		rO.redisUrlLpush(url, "core");
 
 	}
 
@@ -112,7 +115,7 @@ public class crawler implements Runnable {
 					System.out.println("百度快照");
 				} else {
 					System.out.println(link.attr("href"));
-					rO.redisUrlSadd(link.attr("href"), "core");
+					rO.redisUrlLpush(link.attr("href"), "core");
 					// System.out.println(link.attr("title"));
 				}
 			}
@@ -153,7 +156,7 @@ public class crawler implements Runnable {
 				map.put("title", title);
 				map.put("text", text);
 				System.out.println(link.attr("href"));
-				rO.redisUrlSadd(link.attr("href"));
+				rO.redisUrlLpush(link.attr("href"));
 				// System.out.println(link.attr("title"));
 
 			}
@@ -216,11 +219,11 @@ public class crawler implements Runnable {
 					//上一次爬取的时间
 					map.put("title", title);
 					map.put("text", text);
-					System.out.println(link.attr("href"));
-					rO.redisUrlSadd(link.attr("href"));
-					System.out.println(urlPop);
+//System.out.println(link.attr("href"));
+					rO.redisUrlLpush(link.attr("href"));
+//System.out.println(urlPop);
 					rO.redisMapAdd(link.attr("href"), map);
-					// System.out.println(link.attr("title"));
+// System.out.println(link.attr("title"));
 
 					// Document
 				}
@@ -228,15 +231,63 @@ public class crawler implements Runnable {
 
 		}
 	}
-
+    public boolean urlAdd(String url){
+    	String key="bufferPool";
+    	long before=rO.redisGetSetNums(key);
+    	rO.redisSadd(key,url);
+    	long now=rO.redisGetSetNums(key);
+    	if(now-before==1){//如果队列中没有，则添加到列表中
+    		rO.redisUrlLpush(url);
+    		
+    		return true;
+    	}
+    	return false;
+    }
+	
+	
+	
 	public void storeData(String url) {
 
 	}
-
+	public List<String> getListInformationByXpath(Document doc,String xpath){
+		//返回一个处理的列表值
+		List<String> results=Xsoup.compile(xpath).evaluate(doc).list();
+		return results;
+	}
+    public String getInformationByXpath(Document doc,String xpath){
+    //根据xpath获取需要的数据
+    	String result=Xsoup.compile(xpath).evaluate(doc).get();
+    	return result;
+    }
 	public void getInformation(String url) {
 		Document doc = htmlDownload(url);
-		String title = doc.title();
-		String word = doc.text();
+		Date nowTime = new Date();
+		long lnow = nowTime.getTime();
+		String title;
+		String text;
+		Map<String,String> map=new HashMap<String,String>();
+		doc = htmlDownload(url);
+		// urlPop=rO.redisUrlSpop("url:core");
+
+		// getAndStoreNormalUrl(now);
+
+		Elements links = doc.select("a");
+		@SuppressWarnings("unused")
+		String slink;
+		for (Element link : links) {
+			if (link.attr("target").equals("_blank")) {
+				// slink=link.toString();
+				title = doc.title();
+				text = doc.text();
+				map.put("lastModify", String.valueOf(lnow));
+				//上一次爬取的时间
+				map.put("title", title);
+				map.put("text", text);
+				System.out.println(link.attr("href"));
+				rO.redisUrlLpush(link.attr("href"));
+				System.out.println(url);
+				rO.redisMapAdd(link.attr("href"), map);
+			}}
 	}
 
 	public static void main(String[] args) {

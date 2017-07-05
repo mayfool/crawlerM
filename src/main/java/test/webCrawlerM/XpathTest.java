@@ -47,19 +47,30 @@ public class XpathTest {
     List<String> list = Xsoup.compile("//tr/td/text()").evaluate(document).list();
     Assert.assertEquals("a", list.get(0));
     Assert.assertEquals("b", list.get(1));
+    
+    
+    String a=XpathTest.XpathTestUrl("http://news.qq.com/l/health2012/cydt/list2011121295527_2.htm", "//div[@class='leftList']/ul/li/a/@href");
+	System.out.println(a);
+	String []xpaths=new String[2];
+	xpaths[0]="//div[@class=”leftList”]/ul/li/a/@href";
+	xpaths[1]="//div[@id='C-Main-Article-QQ']/div/h1/text()";
+	String mm=XpathTest.AllTestIn1("http://news.qq.com/l/health2012/cydt/list2011121295527_2.htm", xpaths);
+	System.out.println(mm);
 	}
 	
 //使用方法 可以利用方法a来进行对单个xPath的判断，
 //也可以通过方法c传入一个String数组的方法来对所有数组里的xPath
 //进行判断 
 	
-	public static String XpathTestOne(String url,String xPath) throws IOException{//a
-		Document doc=Jsoup.connect(url).get();
-		String result=Xsoup.compile(xPath).evaluate(doc).get();
-		if(result==null||result=="")
-		 return "0";
+	public static String XpathTestUrl(String mobanUrl,String xPath) throws IOException{//a
+		Document doc=Jsoup.connect(mobanUrl).get();
+		String result=Xsoup.compile("//div[@class='leftList']/ul/li/a/@href").evaluate(doc).get();
+		System.out.println("结果是"+result);
+		return result;
+		/*if(result==null||result=="")
+		 return false;
 		
-		return "1";
+		return true;*/
 		
 	}
 	
@@ -75,7 +86,7 @@ public class XpathTest {
 		
 		
 	}
-
+    //对获取到的网页上的url进行测试
 	public static String XpathTests(String  url,String []xpaths) throws IOException{
 		Document doc=Jsoup.connect(url).get();
 		int length=xpaths.length;
@@ -89,6 +100,19 @@ public class XpathTest {
 		
 		return value;
 		
+	}
+	
+	public static String AllTestIn1(String url,String[] xPaths) throws IOException{
+		String result=XpathTestUrl(url,xPaths[0]);
+		String value="1";
+		if(result==null||result==""){
+			return "无法抓取到当前页面的url";
+		}
+		Document doc=Jsoup.connect(result).get();
+		for(int i=1;i<xPaths.length;i++){
+		  value+=XpathTestOne(doc,xPaths[i]);
+		}
+		return value;
 	}
 	
 	
