@@ -12,14 +12,14 @@ public class redisTest {
 		// 连接本地的 Redis 服务
 
 		@SuppressWarnings("resource")
-		Jedis jedis = new Jedis("123.207.214.91");
+		Jedis jedis = new Jedis("localhost");
 		jedis.sadd("qew", "asd");
 		//JedisPool pool=new JedisPool(new JedisPoolConfig(),"123.207.214.91");
 		//Jedis jedis1=pool.getResource();
 		//Jedis jedis2=pool.getResource();
 		
 		
-		
+		jedis.hset("sdf", "sdf", "你好");
 		System.out.println(jedis.smembers("qew"));
 		// jedis.sadd("foo", "bar");
 		// String value = jedis.get("foo");

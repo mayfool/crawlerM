@@ -1,5 +1,6 @@
 package test.webCrawlerM;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,13 +12,28 @@ import redis.clients.jedis.JedisPoolConfig;
 public class redisOperation {
 	JedisPool pool;
 	Jedis jedis;
+	Date date;
 
 	// JedisPool jp=new JedisPool();
 	public redisOperation() {
 		pool=new JedisPool(new JedisPoolConfig(), "localhost");
 		jedis = pool.getResource();
+		date=new Date();
 	}
 	
+	public String getModelUrl(){
+		String url=jedis.lpop("url_model_list_pool");
+		jedis.rpush("url_model_list_pool", url);
+		
+		return url;
+	}
+	public String getNormalUrl(){
+		String nurl=jedis.lpop("normal_url_pool");
+		//jedis.rpush("normal_url_pool", nurl);
+		return nurl;
+		
+		
+	}
 	
 	public  long  redisGetSetNums(String key){
 		return jedis.scard(key);
@@ -28,22 +44,25 @@ public class redisOperation {
 		return jedis.hget(key, field);
 	}
 
-	public void redisUrlLpush(String url, String status) {
+	public void redisUrlRpush(String key,String url) {
 
 		// this.jedis.sadd("url"+status, url);
 
 		// String value = jedis.get("foo");
 		// System.out.println(value);
-		jedis.lpush("url:" + status, url);
+		jedis.rpush(key,url);
 	}
 
 	public void redisUrlLpush(String url) {// 默认等待处理状态,所有要处理的链接添加
-		                                   //到url；wait列表中
-		this.redisUrlLpush(url, "wait");
+		                                   //到urlwait列表中
+		this.redisUrlRpush(url, "wait");
 	}
 
 	public void redisUrlLpop(String key){
 		jedis.lpop(key);
+	}
+	public void hset(String key,String field,String value){
+		jedis.hset(key, field, value);
 	}
 	
 	public void redisSadd(String key,String url){

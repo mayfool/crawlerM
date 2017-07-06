@@ -31,11 +31,15 @@ public class Allin1Test {
 	//jedis.hset("longtext1", "text", doc.text());
 	//System.out.println(jedis.hget("longtext1", "text"));
 	Map<String,String> map = new HashMap<String,String>();
-	long l=0;
+	long l=2;
 	map.put("asd", "sad");
+	String urlt="$http://med.sina.com/article_list_100_2_$_382.html";
+	System.out.println(urlt.startsWith("$"));
+	System.out.println(urlt.indexOf("$",1));
+	System.out.println(urlt.substring(1).replaceAll("\\$", String.valueOf(l)));
 	MultiThreadCrawler mt=new MultiThreadCrawler();
 	Thread thread1=new Thread(mt);
-	thread1.start();
+	//thread1.start();
 	//Thread thread2=new Thread(new MultiThreadCrawler());
 	///thread2.start();
 	//Thread thread3=new Thread(new MultiThreadCrawler());
