@@ -7,12 +7,15 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.json.JSONObject;
 import org.jsoup.*;
+import org.jsoup.Connection.Response;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -24,12 +27,12 @@ public class crawler implements Runnable {
 	String searchInfoUrl;
 	static int a = 1;
 	String look_up_model="look_up_model";
-	String title="TITLE";
-	String author="AUTHOR";
-	String pubtime="PUBTIME";
-	String content="CONTENT";
-	String source="SOURCE";
-	String next_url="CHANNEL_NEXTURL";
+	String title="title";
+	String author="author";
+	String pubtime="pubtime";
+	String content="content";
+	String source="source";
+	String next_url="channel_nexturl";
 	Date date;
 
 	public crawler() {
@@ -57,7 +60,7 @@ public class crawler implements Runnable {
 		// Document document = Jsoup.parse(new URL(url).openStream(), "GBK",
 		// url);
 		try {
-			doc = Jsoup.connect(url).get();
+			doc = Jsoup.connect(url).timeout(5000).get();
 			//doc = Jsoup.parse(new URL(url).openStream(), "utf-8", url);
 
 		} catch (IOException e) {
@@ -107,7 +110,7 @@ public class crawler implements Runnable {
 		 * if(a<0){ return true;//需要重新处理网页 } return false;
 		 */
 	}
-
+/*
 	public void AddCoreUrl(String url) {
 		storeCoreUrl(url);
 	}
@@ -116,7 +119,7 @@ public class crawler implements Runnable {
 		rO.redisUrlRpush(url, "core");
 
 	}
-
+*/
 	public void getAndStoreBaiduUrl(Document doc) {
 
 		Elements links = doc.select("a[data-click]");
@@ -167,7 +170,7 @@ public class crawler implements Runnable {
 				map.put("title", title);
 				map.put("text", text);
 				System.out.println(link.attr("href"));
-				rO.redisUrlLpush(link.attr("href"));
+				rO.redisUrlRpush(link.attr("href"));
 				// System.out.println(link.attr("title"));
 
 			}
@@ -231,7 +234,7 @@ public class crawler implements Runnable {
 					map.put("title", title);
 					map.put("text", text);
 //System.out.println(link.attr("href"));
-					rO.redisUrlLpush(link.attr("href"));
+					rO.redisUrlRpush(link.attr("href"));
 //System.out.println(urlPop);
 					rO.redisMapAdd(link.attr("href"), map);
 // System.out.println(link.attr("title"));
@@ -296,9 +299,12 @@ public class crawler implements Runnable {
     	return false;
     }
 	
+
+    
     public void crawlerForModel(){
     	String url;
     	while(true){
+    	
     	url=rO.getModelUrl();
     	if(!weatherAddFromBaseUrl(url)){
     		continue;
@@ -323,7 +329,7 @@ public class crawler implements Runnable {
     	//String xpath="//div[@class='leftList']/ul/li/a/@href";
     	
     	//String xpath_next_url="href=\'(.*htm)\'>下一页";
-    	
+    	String htmlString="";
     	
     	
     	
@@ -332,14 +338,18 @@ public class crawler implements Runnable {
 		//Document doc=Jsoup.connect("http://news.qq.com/l/health2012/mtjd/list2011121295102.htm").get();
 		//Document doc=c.htmlDownload("http://news.qq.com/l/health2012/mtjd/list2011121295102.htm");
     	//List<String> normalUrls=c.getListInformationByXpath(doc, xpath);
-		String htmlString = doc.html();
+    	try{
+	    htmlString = doc.html();}
+    	catch(Exception e){
+    		e.printStackTrace();
+    	}
 		Matcher matcher = pattern.matcher(htmlString);
 		matcher.find();
-		
+		Matcher matcher2=pattern2.matcher(matcher.group());
+    	matcher2.find();
     	String page_next_url="";
     	try{
-    	Matcher matcher2=pattern2.matcher(matcher.group());
-    	matcher2.find();
+    
     	page_next_url=matcher2.group();}
     	catch(Exception e){
     		System.out.println(e.getMessage());
@@ -392,6 +402,9 @@ public class crawler implements Runnable {
     public void crawlerForNormalUrl(){
     	while(true){
     	String nurl=rO.getNormalUrl();
+    	if(nurl.startsWith("/")){
+    		nurl=rO.hget(nurl,"look_up_model")+nurl;
+    	}
     	Document doc=this.htmlDownload(nurl);
     	String modelUrl=rO.hget(nurl, look_up_model);
     	try{
@@ -471,7 +484,7 @@ public class crawler implements Runnable {
 				map.put("title", title);
 				map.put("text", text);
 				System.out.println(link.attr("href"));
-				rO.redisUrlLpush(link.attr("href"));
+				rO.redisUrlRpush(link.attr("href"));
 				System.out.println(url);
 				rO.redisMapAdd(link.attr("href"), map);
 			}}
@@ -501,10 +514,13 @@ public class crawler implements Runnable {
 		
 //c.crawlerForModelWithRegexNextUrl("http://news.qq.com/l/health2012/yyqy/list2011121295156.htm","//div[@class='leftList']/ul/li/a/@href","href=\"(.*htm)\">下一页");
 //c.crawlerForModelWithoutRegexNextUrl("http://med.sina.com/article_list_100_2_1_382.html", "//div[@class='indextitle-text']/a/@href", "$http://med.sina.com/article_list_100_2_$_382.html");       // c.crawlerForModel();
-c.crawlerForNormalUrl();
+//c.crawlerForNormalUrl();
 		//c.crawlerForNormalUrl();
+		//c.getModelFromHttpServer();
 		String a=null;
 		String b=(a==null)?"qwe":"sdf";
+		System.out.println(c.htmlDownload("http://health.people.com.cn/GB/408565/index.html"));
+
 		System.out.println(b);
 	}
 

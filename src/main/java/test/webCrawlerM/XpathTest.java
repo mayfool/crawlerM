@@ -37,7 +37,7 @@ public class XpathTest {
 
     String result = Xsoup.compile("//b/@mf").evaluate(document).get();
     if(result==null){
-    	System.out.println("null");
+    	//System.out.println("null");
     }
     else if(result==""){
     	System.out.println("kong");
@@ -49,13 +49,12 @@ public class XpathTest {
     Assert.assertEquals("b", list.get(1));
     
     
-    String a=XpathTest.XpathTestUrl("http://news.qq.com/l/health2012/cydt/list2011121295527_2.htm", "//div[@class='leftList']/ul/li/a/@href");
-	System.out.println(a);
+    String a=XpathTest.XpathTestUrl("http://news.qq.com/l/health2012/cydt/list2011121295527.htm", "//div[@class=\"leftList\"]/ul/li/a/@href");
 	String []xpaths=new String[2];
 	xpaths[0]="//div[@class=”leftList”]/ul/li/a/@href";
 	xpaths[1]="//div[@id='C-Main-Article-QQ']/div/h1/text()";
-	String mm=XpathTest.AllTestIn1("http://news.qq.com/l/health2012/cydt/list2011121295527_2.htm", xpaths);
-	System.out.println(mm);
+	//String mm=XpathTest.AllTestIn1("http://news.qq.com/l/health2012/cydt/list2011121295527_2.htm", xpaths);
+	//System.out.println(mm);
 	}
 	
 //使用方法 可以利用方法a来进行对单个xPath的判断，
@@ -64,7 +63,7 @@ public class XpathTest {
 	
 	public static String XpathTestUrl(String mobanUrl,String xPath) throws IOException{//a
 		Document doc=Jsoup.connect(mobanUrl).get();
-		String result=Xsoup.compile("//div[@class='leftList']/ul/li/a/@href").evaluate(doc).get();
+		String result=Xsoup.compile(xPath).evaluate(doc).get();
 		System.out.println("结果是"+result);
 		return result;
 		/*if(result==null||result=="")
