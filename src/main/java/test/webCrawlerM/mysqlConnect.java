@@ -3,6 +3,7 @@ package test.webCrawlerM;
 //import java.beans.Statement;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -25,6 +26,13 @@ public class mysqlConnect {
             //创建一个Statement对象
             Statement stmt = conn.createStatement(); //创建Statement对象
             System.out.print("成功连接到数据库！");
+            int a=1;
+            String sql = "select * from storm where id="+a;
+            ResultSet rs=stmt.executeQuery(sql);
+            while(rs.next()){
+            	System.out.println(rs.getInt(1));
+            	System.out.println(rs.getString(2));
+            }
             stmt.close();
             conn.close();
         } catch (SQLException e){

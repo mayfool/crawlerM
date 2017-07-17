@@ -4,11 +4,14 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
@@ -18,8 +21,11 @@ import redis.clients.jedis.Jedis;
 
 public class Allin1Test {
 	
-	public void getModelUrlFromServer(){
+	//public void getModelUrlFromServer(){
 		// JSONObject obj = new JSONObject(new JSONTokener(new FileReader(new File("1.txt"))));  
+		//Pattern pattern = Pattern.compile(xpath_next_url);
+    	
+		/*
 		JSONObject jsonObject = new JSONObject("{\"author\":\"//span[@bosszone='jgname']/a/text()\","
 				+ "\"channel_name\":\"产业动态\","
 				//+ "\"channel_nexturl\":\"href=\"(.*htm)\">下一页\","
@@ -43,8 +49,87 @@ public class Allin1Test {
 		        System.out.println(key);
 		        System.out.println(value);
 		}
-	}
-	public static void main(String []args){
+	}*/
+	public static void main(String []args) throws ParseException{
+        
+		Jedis jedis=new Jedis("localhost");
+		for(String key:jedis.smembers("url_model")){
+			jedis.lpush("url_model_list_pool", key);
+		}
+		
+		URL furl;
+		String host="";
+		try {
+			furl = new URL("http://www.jiankang.com/news/");
+			host=furl.getHost();
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println(host);
+		
+		
+		/*
+		String a=" asdf";
+		a=a.replace(" ", "");
+		System.out.println(a);
+		Date date;
+		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		
+		//date=new Date("Wed Jun 28 11:54:56 CST 2017");
+		date=sdf.parse("2013-01-17 09:49");
+		System.out.println(date.getTime());
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		//Pattern pattern2=Pattern.compile("\"(.*?)htm");//处理提取链接
+    	//Matcher matcher2=pattern2.matcher("<a href=\"index3.html\">下一页</a>");
+    	//matcher2.find();
+    	//System.out.println(matcher2.group().substring(1));
+		/*
 		Jedis jedis=new Jedis();
 		String a="3";
 		String b="5";
@@ -75,7 +160,8 @@ public class Allin1Test {
 	//Thread thread2=new Thread(new MultiThreadCrawler());
 	///thread2.start();
 	//Thread thread3=new Thread(new MultiThreadCrawler());
-	//thread3.start();
+	//thread3.start();*/
+		
 	
 	}
 }
