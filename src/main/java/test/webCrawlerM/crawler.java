@@ -64,7 +64,7 @@ public class crawler implements Runnable {
 			doc = Jsoup.connect(url).timeout(50000).get();
 			// doc = Jsoup.parse(new URL(url).openStream(), "utf-8", url);
 
-		} catch (IOException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -295,7 +295,7 @@ public class crawler implements Runnable {
 	public void crawlerForModel() {
 		String url;
 		while (true) {
-
+           
 			url = rO.getModelUrl();
 			if (!weatherAddFromBaseUrl(url)) {
 				continue;
@@ -389,7 +389,10 @@ public class crawler implements Runnable {
 
 		List<String> normalUrls = this.getListInformationByXpath(doc, xpath);
 
-		for (String normalUrl : normalUrls) {
+		for (String normalUrl : normalUrls) {//部分捕捉到的链接是相对链接的形式
+			if(normalUrl.startsWith("/")){
+				normalUrl=model_url+normalUrl;
+			}
 			this.urlAdd(normalUrl, model_url);
 		}
 		if (!page_next_url.equals("")) {
@@ -423,23 +426,43 @@ public class crawler implements Runnable {
 	public void crawlerForNormalUrl() {
 		while (true) {
 			String nurl = rO.getNormalUrl();
-			if (nurl.startsWith("/")) {
-				nurl = rO.hget(nurl, "look_up_model") + nurl;
-			}
-			Document doc = this.htmlDownload(nurl);
 			String modelUrl = rO.hget(nurl, look_up_model);
+			if (nurl.startsWith("/")) {
+				try {
+					URL furl=new URL(modelUrl);
+					String host=furl.getHost();
+					nurl="http://"+host+nurl;
+					//page_next_url=host+page_next_url;
+				} catch (MalformedURLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			}
+
+			Document doc = this.htmlDownload(nurl);
+			
 			try {
 				String xpath_title = rO.hget(modelUrl, title);
-				String xpath_author = rO.hget(modelUrl, author);
-				String xpath_pubtime = rO.hget(modelUrl, pubtime);
-				String xpath_content = rO.hget(modelUrl, content);
-				String xpath_source = rO.hget(modelUrl, source);
-
 				String page_title = this.getInformationByXpath(doc, xpath_title);
+				
+				String xpath_author = rO.hget(modelUrl, author);
 				String page_author = this.getInformationByXpath(doc, xpath_author);
+				
+				String xpath_pubtime = rO.hget(modelUrl, pubtime);
 				String page_pubtime = this.getInformationByXpath(doc, xpath_pubtime);
+				
+				String xpath_content = rO.hget(modelUrl, content);
 				String page_content = this.getInformationByXpath(doc, xpath_content);
+				
+				String xpath_source = rO.hget(modelUrl, source);
 				String page_source = this.getInformationByXpath(doc, xpath_source);
+
+				
+				
+				
+				
+				
 				// String
 				// page_title=this.getInformationByXpath(doc,xpath_title);
 				page_title = (page_title == null) ? "" : page_title;
@@ -498,6 +521,9 @@ public class crawler implements Runnable {
 
 	public String getInformationByXpath(Document doc, String xpath) {
 		// 根据xpath获取需要的数据
+		if(xpath==null){
+			return null;
+		}
 		String result = Xsoup.compile(xpath).evaluate(doc).get();
 		return result;
 	}
@@ -566,7 +592,7 @@ public class crawler implements Runnable {
 		// c.crawlerForNormalUrl();
 		// c.crawlerForNormalUrl();
 		// c.getModelFromHttpServer();
-		c.crawlerForModel();
+		c.crawlerForNormalUrl();
 		String a = null;
 		String b = (a == null) ? "qwe" : "sdf";
 		System.out.println(c.htmlDownload("http://health.people.com.cn/GB/408565/index.html"));

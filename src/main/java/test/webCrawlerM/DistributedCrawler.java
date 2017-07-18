@@ -52,6 +52,7 @@ public class DistributedCrawler extends crawler {
 		String source="";
 		String content="";
 		String url="";
+		String title="";
 		String channel_url=jsonObject.getString("channel_url");
 		this.AddUrl(channel_url);
 		String website_name="";
